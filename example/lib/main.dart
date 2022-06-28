@@ -42,8 +42,11 @@ class _MyAppState extends State<MyApp> {
               mainAxisSpacing: 4,),
             itemBuilder: (context, index) {
               return GestureDetector(
-                onTap: () {
-                  print("DHDHDH");
+              onTap: () {
+                print("ddd");
+              },
+                onDoubleTap:(){
+                print("double");
                 },
                 child: MyImageView.fromUrl(
                   url:
@@ -51,11 +54,6 @@ class _MyAppState extends State<MyApp> {
                   fit: BoxFit.fitWidth,
                   backgroundColor: Colors.red,
                   progressImage: progressImage,
-                  tapGestureRecognizer: TapGestureRecognizer()
-                    ..onTapDown = (details) {
-                      print("TAPAPAPA");
-                    },
-
                 ),
               );
             },

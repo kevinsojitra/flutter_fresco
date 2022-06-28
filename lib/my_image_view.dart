@@ -16,50 +16,63 @@ class MyImageView extends StatelessWidget {
   final Color backgroundColor;
   final BoxFit fit;
   final Uint8List? progressImage;
-  final TapGestureRecognizer tapGestureRecognizer;
 
-  const MyImageView.fromUrl(
-      {super.key,
-      required this.url,
-      this.height,
-      this.width,
-      this.ratio = 0,
-      this.isCircle = false,
-      this.fit = BoxFit.none,
-      this.backgroundColor = Colors.transparent,
-      this.progressImage,
-      required this.tapGestureRecognizer});
+  const MyImageView.fromUrl({
+    super.key,
+    required this.url,
+    this.height,
+    this.width,
+    this.ratio = 0,
+    this.isCircle = false,
+    this.fit = BoxFit.none,
+    this.backgroundColor = Colors.transparent,
+    this.progressImage,
+  });
 
   @override
   Widget build(BuildContext context) {
     const String viewType = 'fresco/my_image_view';
-    return SizedBox(
-      width: width,
-      height: height,
-      child: PlatformViewLink(
-        viewType: viewType,
-        surfaceFactory: (context, controller) {
-          return AndroidViewSurface(
-            controller: controller as AndroidViewController,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{}
-              ..add(TapGestureRecognizer),
-            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-          );
-        },
-        onCreatePlatformView: (params) {
-          return PlatformViewsService.initSurfaceAndroidView(
-            id: params.id,
-            viewType: viewType,
-            layoutDirection: TextDirection.ltr,
-            creationParams: setParam(),
-            creationParamsCodec: const StandardMessageCodec(),
-            onFocus: () {
-              params.onFocusChanged(true);
-            },
-          )
-            ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
-            ..create();
-        },
+    return RawGestureDetector(
+      gestures: <Type, GestureRecognizerFactory>{
+        TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                () => TapGestureRecognizer(),
+                (TapGestureRecognizer instance) {
+
+            }
+        )
+      },
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: PlatformViewLink(
+          viewType: viewType,
+          surfaceFactory: (context, controller) {
+            return AndroidViewSurface(
+              controller: controller as AndroidViewController,
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<OneSequenceGestureRecognizer>(
+                  () => TapGestureRecognizer(),
+                ),
+              },
+              hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+            );
+          },
+          onCreatePlatformView: (params) {
+            return PlatformViewsService.initSurfaceAndroidView(
+              id: params.id,
+              viewType: viewType,
+              layoutDirection: TextDirection.ltr,
+              creationParams: setParam(),
+              creationParamsCodec: const StandardMessageCodec(),
+              onFocus: () {
+                params.onFocusChanged(true);
+              },
+            )
+              ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
+              ..create();
+          },
+        ),
       ),
     );
   }
