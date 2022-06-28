@@ -30,14 +30,19 @@ public class FlutterMyImageView implements PlatformView {
         }
         imageView = new DynamicHeightImageView(context);
         imageView.setId(id);
-        imageView.setBackgroundColor(Color.parseColor(Objects.requireNonNull(creationParams.get("bgColor")).toString()));
         byte[] b = (byte[]) creationParams.get("progressImage");
         GenericDraweeHierarchy hierarchy = new GenericDraweeHierarchyBuilder(context.getResources())
-                .setActualImageScaleType(getScaleType(Integer.parseInt(Objects.requireNonNull(creationParams.get("scaleType")).toString())))
+                .setActualImageScaleType(ScalingUtils.ScaleType.CENTER_INSIDE)
                 .setFadeDuration(700)
                 .build();
         if (b != null) {
-            hierarchy.setProgressBarImage(new AutoRotateDrawable(new BitmapDrawable(context.getResources(), BitmapFactory.decodeByteArray(b, 0, b.length)), 1000));
+            hierarchy.setProgressBarImage(new AutoRotateDrawable(new BitmapDrawable(context.getResources(), BitmapFactory.decodeByteArray(b, 0, b.length)), 1000), ScalingUtils.ScaleType.CENTER_INSIDE);
+        }
+        if (creationParams.containsKey("scaleType")) {
+            hierarchy.setActualImageScaleType(getScaleType(Integer.parseInt(Objects.requireNonNull(creationParams.get("scaleType")).toString())));
+        }
+        if (creationParams.containsKey("bgColor")) {
+            imageView.setBackgroundColor(Color.parseColor(Objects.requireNonNull(creationParams.get("bgColor")).toString()));
         }
         if (Boolean.parseBoolean(Objects.requireNonNull(creationParams.get("isCircle")).toString())) {
             hierarchy.setRoundingParams(RoundingParams.asCircle());
@@ -51,6 +56,7 @@ public class FlutterMyImageView implements PlatformView {
         if (creationParams.containsKey("ratio")) {
             imageView.setRatio(Float.parseFloat(Objects.requireNonNull(creationParams.get("ratio")).toString()));
         }
+
         imageView.setImageURI(String.valueOf(creationParams.get("url")));
     }
 
@@ -87,9 +93,9 @@ public class FlutterMyImageView implements PlatformView {
             case 11:
                 return ScalingUtils.ScaleType.FIT_BOTTOM_START;
             case 7:
-            default:
                 return ScalingUtils.ScaleType.CENTER;
-
+            default:
+                throw new IllegalStateException("Unexpected value: " + type);
         }
     }
 }

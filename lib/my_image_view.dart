@@ -1,106 +1,80 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:fresco/scale_type.dart';
 
 @immutable
 class MyImageView extends StatelessWidget {
-  final ImageOptions? options;
   final String url;
+  final double? height, width;
+  final double ratio;
+  final bool isCircle;
+  final Color backgroundColor;
+  final BoxFit fit;
+  final Uint8List? progressImage;
+  final TapGestureRecognizer tapGestureRecognizer;
 
-  const MyImageView.fromUrl({super.key, required this.url, this.options});
+  const MyImageView.fromUrl(
+      {super.key,
+      required this.url,
+      this.height,
+      this.width,
+      this.ratio = 0,
+      this.isCircle = false,
+      this.fit = BoxFit.none,
+      this.backgroundColor = Colors.transparent,
+      this.progressImage,
+      required this.tapGestureRecognizer});
 
   @override
   Widget build(BuildContext context) {
     const String viewType = 'fresco/my_image_view';
-    // Pass parameters to the platform side.
-   /* Map<String, dynamic> creationParams = {"url": url};
-    if (options!=null) {
-      creationParams.addAll(options!.toMap());
-    }*/
-    return FutureBuilder<Map<String, dynamic>>(builder: (context, snapshot) {
-      return snapshot.hasData?AndroidView(
+    return SizedBox(
+      width: width,
+      height: height,
+      child: PlatformViewLink(
         viewType: viewType,
-        creationParams: setParam(snapshot),
-        creationParamsCodec: const StandardMessageCodec(),
-      ):const SizedBox();
-    },future: getParam(),);
+        surfaceFactory: (context, controller) {
+          return AndroidViewSurface(
+            controller: controller as AndroidViewController,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{}
+              ..add(TapGestureRecognizer),
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+        onCreatePlatformView: (params) {
+          return PlatformViewsService.initSurfaceAndroidView(
+            id: params.id,
+            viewType: viewType,
+            layoutDirection: TextDirection.ltr,
+            creationParams: setParam(),
+            creationParamsCodec: const StandardMessageCodec(),
+            onFocus: () {
+              params.onFocusChanged(true);
+            },
+          )
+            ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
+            ..create();
+        },
+      ),
+    );
   }
 
-  setParam(AsyncSnapshot<Map<String, dynamic>> snapshot) {
-    Map<String, dynamic> creationParams = {"url": url};
-    if (snapshot.hasData) {
-      creationParams.addAll(snapshot.data!);
-    }
-    return creationParams;
-  }
-
-  Future<Map<String, dynamic>> getParam() {
-    return options!=null?options!.toMap(): Future.value(null);
-  }
-}
-
-class ImageOptions {
-  double? ratio;
-  bool isCircle;
-  Color backgroundColor;
-  RoundOption? roundOption;
-  ScaleType scaleType;
-  String? progressImage;
-
-  ImageOptions({this.ratio,
-    this.isCircle = false,
-    this.roundOption,
-    this.progressImage,
-    this.scaleType = ScaleType.center,
-    this.backgroundColor = Colors.transparent});
-
-  Future<Map<String, dynamic>> toMap() async {
-    Map<String, dynamic> temp = {
+  setParam() {
+    Map<String, dynamic> creationParams = {
+      "url": url,
+      "ratio": ratio,
       "isCircle": isCircle,
       "bgColor": backgroundColor.toHex(leadingHashSign: true),
-      "scaleType": scaleType.value
-    };
-    if (roundOption != null) {
-      temp.putIfAbsent("round", () => roundOption!.toMap());
-    }
-    if (ratio != null) {
-      temp.putIfAbsent("ratio", () => ratio);
-    }
-    if (progressImage != null) {
-      var bytes = await getProgressImage(progressImage!);
-      temp.putIfAbsent(
-          "progressImage", ()  {
-        return bytes;
-      });
-    }
-    print(temp);
-    return temp;
-  }
-}
-
-Future<Uint8List> getProgressImage(String name) async {
-  ByteData imageBytes = await rootBundle.load(name);
-  return imageBytes.buffer.asUint8List();
-}
-
-class RoundOption {
-  double topLeft, topRight, bottomRight, bottomLeft;
-
-  RoundOption({this.topLeft = 0.0,
-    this.topRight = 0.0,
-    this.bottomRight = 0.0,
-    this.bottomLeft = 0.0});
-
-  Map<String, dynamic> toMap() {
-    Map<String, dynamic> temp = {
-      "topLeft": topLeft,
-      "topRight": topRight,
-      "bottomRight": bottomRight,
-      "bottomLeft": bottomLeft,
+      "scaleType": getScaleType(fit),
+      "progressImage": progressImage,
     };
 
-    return temp;
+    return creationParams;
   }
 }
 
@@ -111,22 +85,4 @@ extension HexColor on Color {
       '${red.toRadixString(16).padLeft(2, '0')}'
       '${green.toRadixString(16).padLeft(2, '0')}'
       '${blue.toRadixString(16).padLeft(2, '0')}';
-}
-
-enum ScaleType {
-  fitXY(1),
-  fitX(2),
-  fitY(3),
-  fitStart(4),
-  fitCenter(5),
-  fitEnd(6),
-  center(7),
-  centerInside(8),
-  centerCrop(9),
-  focuseCrop(10),
-  fitBottomStart(11);
-
-  const ScaleType(this.value);
-
-  final num value;
 }

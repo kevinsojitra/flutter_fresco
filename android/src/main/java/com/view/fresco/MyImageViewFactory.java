@@ -20,7 +20,7 @@ public class MyImageViewFactory extends PlatformViewFactory {
 
     @NonNull
     @Override
-    public PlatformView create(@NonNull Context context, int id, @Nullable Object args) {
+    public PlatformView create( Context context, int id, Object args) {
         final Map<String, Object> creationParams = (Map<String, Object>) args;
         return new FlutterMyImageView(context, id, creationParams);
     }
