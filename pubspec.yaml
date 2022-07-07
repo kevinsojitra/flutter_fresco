@@ -1,6 +1,6 @@
 name: fresco
 description: ImageView for android using https://frescolib.org/docs/index.html.
-version: 0.0.4
+version: 0.0.5
 homepage: https://github.com/kevinsojitra/flutter_fresco.git
 
 environment:
