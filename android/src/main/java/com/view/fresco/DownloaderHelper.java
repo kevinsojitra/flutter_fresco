@@ -1,7 +1,5 @@
 package com.view.fresco;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.widget.Toast;
@@ -37,9 +35,9 @@ public class DownloaderHelper {
                     @Override
                     protected void onNewResultImpl(Bitmap bitmap) {
                         OutputStream fOut = null;
-
+                        String name = String.format("cache_image_fresco.%s", image.contains("png") ? "png" : "jpg");
 //                       String name = new File(image).getName();
-                       File file = new File(context.getCacheDir(), "cache_image_fresco.jpg");
+                        File file = new File(context.getCacheDir(), name);
                         try {
                             fOut = new FileOutputStream(file);
                             if (name.endsWith("png")) {
@@ -53,7 +51,7 @@ public class DownloaderHelper {
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
-                           e.printStackTrace();
+                            e.printStackTrace();
                         }
 
 
