@@ -23,7 +23,7 @@ abstract class FrescoPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+  Future<String?> getFile(String url) {
+    throw UnimplementedError('getFile() has not been implemented.');
   }
 }

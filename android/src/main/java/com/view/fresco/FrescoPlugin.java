@@ -1,5 +1,7 @@
 package com.view.fresco;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -18,19 +20,28 @@ public class FrescoPlugin implements FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private MethodChannel channel;
+  private Context context;
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "fresco");
     channel.setMethodCallHandler(this);
+    context = flutterPluginBinding.getApplicationContext();
     flutterPluginBinding.getPlatformViewRegistry()
             .registerViewFactory("fresco/my_image_view", new MyImageViewFactory());
   }
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-    if (call.method.equals("getPlatformVersion")) {
-      result.success("Android " + android.os.Build.VERSION.RELEASE);
+    if (call.method.equals("getFile")) {
+      String url = (String) call.arguments;
+      DownloaderHelper.start(context, url, new OnDownloadListener() {
+        @Override
+        public void onDownloadComplete(String path) {
+          result.success(path);
+        }
+      });
+
     } else {
       result.notImplemented();
     }

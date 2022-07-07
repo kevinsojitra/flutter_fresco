@@ -10,8 +10,8 @@ class MethodChannelFresco extends FrescoPlatform {
   final methodChannel = const MethodChannel('fresco');
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+  Future<String?> getFile(String url) async {
+    final file = await methodChannel.invokeMethod<String>('getFile',url);
+    return file;
   }
 }
