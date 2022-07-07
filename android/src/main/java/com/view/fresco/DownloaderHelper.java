@@ -38,8 +38,8 @@ public class DownloaderHelper {
                     protected void onNewResultImpl(Bitmap bitmap) {
                         OutputStream fOut = null;
 
-                       String name = new File(image).getName();
-                       File file = new File(context.getCacheDir(), name);
+//                       String name = new File(image).getName();
+                       File file = new File(context.getCacheDir(), "cache_image_fresco.jpg");
                         try {
                             fOut = new FileOutputStream(file);
                             if (name.endsWith("png")) {
